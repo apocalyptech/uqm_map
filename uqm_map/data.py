@@ -195,42 +195,51 @@ class SafetyAggFilter(object):
         """
         Initial filter will end up accepting all planets on the map
         """
-        self.tectonics_dir = -1
-        self.weather_dir = -1
-        self.temp_dir = -1
-        self.bio_dir = -1
-        self.tectonics_val = 8
-        self.weather_val = 8
-        self.temp_val = 5200
-        self.bio_val = 400
-        self.activate()
+        self.set_tectonics(8)
+        self.set_weather(8)
+        self.set_temp(5200)
+        self.set_bio(400)
 
-    def activate(self):
+    def set_tectonics(self, tectonics_val, less_than=True):
         """
-        If any of the internal "direction" variables (*_dir) change, call this
-        to make sure that the testing functions are updated properly.
+        Sets our tectonics match limit to `tectonics_val`.  If `less_than`
+        is `True`, we'll use a <= match.  Otherwise, >=.
         """
-
-        # Define the function to test tectonics
-        if (self.tectonics_dir < 0):
+        self.tectonics_val = tectonics_val
+        if less_than:
             self.tectonics = self.tectonics_lte
         else:
             self.tectonics = self.tectonics_gte
 
-        # Define the function to test weather
-        if (self.weather_dir < 0):
+    def set_weather(self, weather_val, less_than=True):
+        """
+        Sets our weather match limit to `weather_val`.  If `less_than`
+        is `True`, we'll use a <= match.  Otherwise, >=.
+        """
+        self.weather_val = weather_val
+        if less_than:
             self.weather = self.weather_lte
         else:
             self.weather = self.weather_gte
 
-        # Define the function to test temp
-        if (self.temp_dir < 0):
+    def set_temp(self, temp_val, less_than=True):
+        """
+        Sets our temp match limit to `temp_val`.  If `less_than`
+        is `True`, we'll use a <= match.  Otherwise, >=.
+        """
+        self.temp_val = temp_val
+        if less_than:
             self.temp = self.temp_lte
         else:
             self.temp = self.temp_gte
 
-        # Define the function to test bio
-        if (self.bio_dir < 0):
+    def set_bio(self, bio_val, less_than=True):
+        """
+        Sets our bio match limit to `bio_val`.  If `less_than`
+        is `True`, we'll use a <= match.  Otherwise, >=.
+        """
+        self.bio_val = bio_val
+        if less_than:
             self.bio = self.bio_lte
         else:
             self.bio = self.bio_gte

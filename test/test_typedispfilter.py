@@ -20,7 +20,7 @@
 
 import unittest
 
-from uqm_map.data import TypeDispFilter, System, Planet
+from uqm_map.data import TypeDispFilter, System, Planet, MinData
 
 class TypeDispFilterTests(unittest.TestCase):
     """
@@ -32,10 +32,10 @@ class TypeDispFilterTests(unittest.TestCase):
         """
         Some objects which we're likely to want in various tests
         """
-        self.planet_acid = Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 0, 0, 0)
-        self.planet_chlorine = Planet(2, 'Chlorine', 'Chlorine World', 1, 1, 100, 1, 0, 0, 0)
-        self.planet_dust = Planet(3, 'Dust', 'Dust World', 1, 1, 100, 1, 0, 0, 0)
-        self.planet_emerald = Planet(4, 'Emerald', 'Emerald World', 1, 1, 100, 1, 0, 0, 0)
+        self.planet_acid = Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 0, 0, MinData())
+        self.planet_chlorine = Planet(2, 'Chlorine', 'Chlorine World', 1, 1, 100, 1, 0, 0, MinData())
+        self.planet_dust = Planet(3, 'Dust', 'Dust World', 1, 1, 100, 1, 0, 0, MinData())
+        self.planet_emerald = Planet(4, 'Emerald', 'Emerald World', 1, 1, 100, 1, 0, 0, MinData())
 
     def test_init(self):
         """

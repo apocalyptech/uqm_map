@@ -30,6 +30,8 @@ class MinData(object):
     system uses a few of these for aggregate data as well.
     """
 
+    min_vals = [ 'common', 'corrosive', 'base', 'noble', 'rare', 'precious', 'radioactive', 'exotic' ]
+
     def __init__(self, common=0, corrosive=0, base=0, noble=0, rare=0, precious=0, radioactive=0, exotic=0):
         self.common = common
         self.corrosive = corrosive
@@ -39,6 +41,19 @@ class MinData(object):
         self.precious = precious
         self.radioactive = radioactive
         self.exotic = exotic
+
+    def add(self, other):
+        """
+        Adds another MinData structure to ourselves.
+        """
+        self.common += other.common
+        self.corrosive += other.corrosive
+        self.base += other.base
+        self.noble += other.noble
+        self.rare += other.rare
+        self.precious += other.precious
+        self.radioactive += other.radioactive
+        self.exotic += other.exotic
 
     def value(self):
         """
@@ -282,6 +297,7 @@ class System(object):
         self.name = name
         self.x = x
         self.y = y
+        # TODO: These two vars are GUI-specific; move 'em to there.
         self.draw_x = int(x/10)
         self.draw_y = 1000-int(y/10)
         self.position = position
@@ -311,13 +327,17 @@ class System(object):
         """
         Returns the distance between this system and the specified one
         """
-        if system:
-            return (math.sqrt((self.x-system.x)**2+(self.y-system.y)**2)/10)
+        return (math.sqrt((self.x-system.x)**2+(self.y-system.y)**2)/10)
 
-    def set_aggregate(self, dispfilter, aggfilter):
+    def apply_filters(self, dispfilter, aggfilter):
         """
-        Sets the aggregate mineral/bio value of the planet, using the given
-        filters.  Will set the "highlight" property appropriately.
+        Applies the given display and aggregate filters to our system.  Sets
+        our internal `highlight` variable to indicate whether the system
+        should be highlighted (ie: it succeeds in passing the `dispfilter`),
+        and sets the internal aggregate variables based on the safety
+        parameters defined by `aggfilter`.  Returns a tuple with two elements:
+            1) The total mineral value, when `aggfilter` is taken into account
+            2) The total bio value, when `aggfilter` is taken into account
         """
         self.highlight = dispfilter.approve(self)
         self.min_agg = MinData()
@@ -329,37 +349,12 @@ class System(object):
         for planet in self.planets:
             self.bio_agg_full += planet.bio
             self.bio_danger_agg_full += planet.bio_danger
-            for mineral in min_vals:
-                self.min_agg_full.__dict__[mineral] += planet.mineral.__dict__[mineral]
+            self.min_agg_full.add(planet.mineral)
             if (aggfilter.approve(planet)):
                 self.bio_agg += planet.bio
                 self.bio_danger_agg += planet.bio_danger
-                for mineral in min_vals:
-                    self.min_agg.__dict__[mineral] += planet.mineral.__dict__[mineral]
+                self.min_agg.add(planet.mineral)
         return (self.min_agg.value(), self.bio_agg)
-
-    # Aggregate reporting follows;  I suppose this isn't very Pythonic, but
-    # it means slightly less typing later on.  Go figure.
-    def agg_value(self):
-        return self.min_agg.value()
-    def agg_weight(self):
-        return self.min_agg.weight()
-    def agg_worth(self):
-        return self.min_agg.worth()
-    def full_agg_value(self):
-        return self.min_agg_full.value()
-    def full_agg_weight(self):
-        return self.min_agg_full.weight()
-    def full_agg_worth(self):
-        return self.min_agg_full.worth()
-    def bio_agg_value(self):
-        return self.bio_agg
-    def full_bio_agg_value(self):
-        return self.bio_agg_full
-    def bio_danger_agg_value(self):
-        return self.bio_danger_agg
-    def full_bio_danger_agg_value(self):
-        return self.bio_danger_agg_full
 
 class Systems(object):
     """
@@ -441,7 +436,7 @@ class Systems(object):
         for system in self.getall():
             if (system.quasi):
                 continue
-            (mineral, bio) = system.set_aggregate(self.dispfilter, self.aggfilter)
+            (mineral, bio) = system.apply_filters(self.dispfilter, self.aggfilter)
             if (system.highlight):
                 if (mineral < self.agg_min_value):
                     self.agg_min_value = mineral
@@ -461,7 +456,7 @@ class Systems(object):
         if (self.agg_spread == 0):
             return 100
         else:
-            return (system.agg_value()-self.agg_min_value)/self.agg_spread
+            return (system.min_agg.value()-self.agg_min_value)/self.agg_spread
 
     def ret_bio_intensity(self, system):
         """
@@ -470,7 +465,7 @@ class Systems(object):
         if (self.bio_spread == 0):
             return 100
         else:
-            return (system.bio_agg_value()-self.bio_agg_min_value)/self.bio_spread
+            return (system.bio_agg-self.bio_agg_min_value)/self.bio_spread
 
 class Quasispace(object):
     """

@@ -254,3 +254,93 @@ class MinDataTests(unittest.TestCase):
         md = MinData(common=1, corrosive=2, base=3, noble=4, rare=5,
             precious=6, radioactive=7, exotic=8)
         self.assertAlmostEqual(md.worth(), 9.639, 3)
+
+    def test_add_common(self):
+        """
+        Tests adding common
+        """
+        md = MinData()
+        md2 = MinData(common=1)
+        md.add(md2)
+        self.assertEqual(md.common, 1)
+
+    def test_add_corrosive(self):
+        """
+        Tests adding corrosive
+        """
+        md = MinData()
+        md2 = MinData(corrosive=1)
+        md.add(md2)
+        self.assertEqual(md.corrosive, 1)
+
+    def test_add_base(self):
+        """
+        Tests adding base
+        """
+        md = MinData()
+        md2 = MinData(base=1)
+        md.add(md2)
+        self.assertEqual(md.base, 1)
+
+    def test_add_noble(self):
+        """
+        Tests adding noble
+        """
+        md = MinData()
+        md2 = MinData(noble=1)
+        md.add(md2)
+        self.assertEqual(md.noble, 1)
+
+    def test_add_rare(self):
+        """
+        Tests adding rare
+        """
+        md = MinData()
+        md2 = MinData(rare=1)
+        md.add(md2)
+        self.assertEqual(md.rare, 1)
+
+    def test_add_precious(self):
+        """
+        Tests adding precious
+        """
+        md = MinData()
+        md2 = MinData(precious=1)
+        md.add(md2)
+        self.assertEqual(md.precious, 1)
+
+    def test_add_radioactive(self):
+        """
+        Tests adding radioactive
+        """
+        md = MinData()
+        md2 = MinData(radioactive=1)
+        md.add(md2)
+        self.assertEqual(md.radioactive, 1)
+
+    def test_add_exotic(self):
+        """
+        Tests adding exotic
+        """
+        md = MinData()
+        md2 = MinData(exotic=1)
+        md.add(md2)
+        self.assertEqual(md.exotic, 1)
+
+    def test_add_all(self):
+        """
+        Tests adding all values
+        """
+        md = MinData(common=1, corrosive=2, base=3, noble=4, rare=5,
+            precious=6, radioactive=7, exotic=8)
+        md2 = MinData(common=8, corrosive=7, base=6, noble=5, rare=4,
+            precious=3, radioactive=2, exotic=1)
+        md.add(md2)
+        self.assertEqual(md.common, 9)
+        self.assertEqual(md.corrosive, 9)
+        self.assertEqual(md.base, 9)
+        self.assertEqual(md.noble, 9)
+        self.assertEqual(md.rare, 9)
+        self.assertEqual(md.precious, 9)
+        self.assertEqual(md.radioactive, 9)
+        self.assertEqual(md.exotic, 9)

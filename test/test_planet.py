@@ -20,7 +20,7 @@
 
 import unittest
 
-from uqm_map.data import Planet
+from uqm_map.data import Planet, MinData
 
 class PlanetTests(unittest.TestCase):
     """
@@ -40,7 +40,7 @@ class PlanetTests(unittest.TestCase):
             gravity=2,
             bio=100,
             bio_danger=50,
-            mineral=42)
+            mineral=MinData())
         self.assertEqual(p.idnum, 1)
         self.assertEqual(p.name, 'Planet')
         self.assertEqual(p.ptype, 'Type')
@@ -50,4 +50,4 @@ class PlanetTests(unittest.TestCase):
         self.assertEqual(p.gravity, 2)
         self.assertEqual(p.bio, 100)
         self.assertEqual(p.bio_danger, 50)
-        self.assertEqual(p.mineral, 42)
+        self.assertNotEqual(p.mineral, None)

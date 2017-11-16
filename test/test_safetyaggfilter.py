@@ -20,7 +20,7 @@
 
 import unittest
 
-from uqm_map.data import SafetyAggFilter, Planet
+from uqm_map.data import SafetyAggFilter, Planet, MinData
 
 class SafetyAggFilterTests(unittest.TestCase):
     """
@@ -59,42 +59,42 @@ class SafetyAggFilterTests(unittest.TestCase):
         """
         Tests matching on a planet.
         """
-        p = Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 0, 0, 0)
+        p = Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 0, 0, MinData())
         self.assertEqual(self.saf.approve(p), True)
 
     def test_no_match_tectonics(self):
         """
         Tests matching on a planet, which fails due to tectonics
         """
-        p = Planet(1, 'Acid', 'Acid World', 9, 1, 100, 1, 0, 0, 0)
+        p = Planet(1, 'Acid', 'Acid World', 9, 1, 100, 1, 0, 0, MinData())
         self.assertEqual(self.saf.approve(p), False)
 
     def test_no_match_weather(self):
         """
         Tests matching on a planet, which fails due to weather
         """
-        p = Planet(1, 'Acid', 'Acid World', 1, 9, 100, 1, 0, 0, 0)
+        p = Planet(1, 'Acid', 'Acid World', 1, 9, 100, 1, 0, 0, MinData())
         self.assertEqual(self.saf.approve(p), False)
 
     def test_no_match_temp(self):
         """
         Tests matching on a planet, which fails due to temp
         """
-        p = Planet(1, 'Acid', 'Acid World', 1, 1, 10000, 1, 0, 0, 0)
+        p = Planet(1, 'Acid', 'Acid World', 1, 1, 10000, 1, 0, 0, MinData())
         self.assertEqual(self.saf.approve(p), False)
 
     def test_no_match_bio(self):
         """
         Tests matching on a planet, which fails due to bio
         """
-        p = Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 500, 500, 0)
+        p = Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 500, 500, MinData())
         self.assertEqual(self.saf.approve(p), False)
 
     def test_match_rev(self):
         """
         Tests matching on a planet, with greater-than matches.
         """
-        p = Planet(1, 'Acid', 'Acid World', 4, 4, 100, 1, 100, 100, 0)
+        p = Planet(1, 'Acid', 'Acid World', 4, 4, 100, 1, 100, 100, MinData())
         self.assertEqual(self.saf_r.approve(p), True)
 
     def test_no_match_rev_tectonics(self):
@@ -102,7 +102,7 @@ class SafetyAggFilterTests(unittest.TestCase):
         Tests matching on a planet, with greater-than matches, which fails
         due to tectonics
         """
-        p = Planet(1, 'Acid', 'Acid World', 1, 4, 100, 1, 100, 100, 0)
+        p = Planet(1, 'Acid', 'Acid World', 1, 4, 100, 1, 100, 100, MinData())
         self.assertEqual(self.saf_r.approve(p), False)
 
     def test_no_match_rev_weather(self):
@@ -110,7 +110,7 @@ class SafetyAggFilterTests(unittest.TestCase):
         Tests matching on a planet, with greater-than matches, which fails
         due to weather
         """
-        p = Planet(1, 'Acid', 'Acid World', 4, 1, 100, 1, 100, 100, 0)
+        p = Planet(1, 'Acid', 'Acid World', 4, 1, 100, 1, 100, 100, MinData())
         self.assertEqual(self.saf_r.approve(p), False)
 
     def test_no_match_rev_temp(self):
@@ -118,7 +118,7 @@ class SafetyAggFilterTests(unittest.TestCase):
         Tests matching on a planet, with greater-than matches, which fails
         due to temp
         """
-        p = Planet(1, 'Acid', 'Acid World', 4, 4, 25, 1, 100, 100, 0)
+        p = Planet(1, 'Acid', 'Acid World', 4, 4, 25, 1, 100, 100, MinData())
         self.assertEqual(self.saf_r.approve(p), False)
 
     def test_no_match_rev_bio(self):
@@ -126,5 +126,5 @@ class SafetyAggFilterTests(unittest.TestCase):
         Tests matching on a planet, with greater-than matches, which fails
         due to bio
         """
-        p = Planet(1, 'Acid', 'Acid World', 4, 4, 100, 1, 100, 10, 0)
+        p = Planet(1, 'Acid', 'Acid World', 4, 4, 100, 1, 100, 10, MinData())
         self.assertEqual(self.saf_r.approve(p), False)

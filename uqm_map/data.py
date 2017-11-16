@@ -305,8 +305,8 @@ class System(object):
         self.extra = extra
         self.highlight = True
         self.planets = []
-        self.min_agg = None
-        self.min_agg_full = None
+        self.mineral_agg = None
+        self.mineral_agg_full = None
         self.bio_agg = None
         self.bio_agg_full = None
         self.bio_danger_agg = None
@@ -340,8 +340,8 @@ class System(object):
             2) The total bio value, when `aggfilter` is taken into account
         """
         self.highlight = dispfilter.approve(self)
-        self.min_agg = MinData()
-        self.min_agg_full = MinData()
+        self.mineral_agg = MinData()
+        self.mineral_agg_full = MinData()
         self.bio_agg = 0
         self.bio_agg_full = 0
         self.bio_danger_agg = 0
@@ -349,12 +349,12 @@ class System(object):
         for planet in self.planets:
             self.bio_agg_full += planet.bio
             self.bio_danger_agg_full += planet.bio_danger
-            self.min_agg_full.add(planet.mineral)
+            self.mineral_agg_full.add(planet.mineral)
             if (aggfilter.approve(planet)):
                 self.bio_agg += planet.bio
                 self.bio_danger_agg += planet.bio_danger
-                self.min_agg.add(planet.mineral)
-        return (self.min_agg.value(), self.bio_agg)
+                self.mineral_agg.add(planet.mineral)
+        return (self.mineral_agg.value(), self.bio_agg)
 
 class Systems(object):
     """

@@ -20,6 +20,28 @@
 
 import os
 import sys
+
+# Figure out where our base `data` path is
+base_dir = os.path.dirname(__file__)
+constellation_file = os.path.join(base_dir, 'constellations.ini')
+data_dir = os.path.join(base_dir, '..', 'data')
+json_file = os.path.join(data_dir, 'uqm.json.gz')
+
+# Bit of a notice to anyone running this
+print("""
+NOTE: This little utility is only useful if you happen to have the
+UQM system/planet data stored in a MySQL database and want to use that
+to regenerate {json_file}
+
+Unless you're me, this is pretty unlikely to be the case.
+
+Hit <ENTER> to continue, or Ctrl-C to abort.""".format(json_file=json_file))
+sys.stdin.readline()
+
+# Munge the system path.  This is lame, but whatever.
+sys.path.append(os.path.join(base_dir, '..'))
+
+# Continue with imports
 import json
 import gzip
 import MySQLdb
@@ -40,22 +62,6 @@ from uqm_map import xdg
 # ... I know you TOTALLY care about all that.  Anyway, it's here for
 # posterity, in case anyone was wondering how the initial pickle had been
 # generated.
-
-# Figure out where our base `data` path is
-data_dir = os.path.join(os.path.dirname(__file__), 'data')
-constellation_file = os.path.join(data_dir, 'constellations.ini')
-json_file = os.path.join(data_dir, 'uqm.json.gz')
-
-# Bit of a notice to anyone running this
-print("""
-NOTE: This little utility is only useful if you happen to have the
-UQM system/planet data stored in a MySQL database and want to use that
-to regenerate {json_file}
-
-Unless you're me, this is pretty unlikely to be the case.
-
-Hit <ENTER> to continue, or Ctrl-C to abort.""".format(json_file=json_file))
-sys.stdin.readline()
 
 # Make sure we have a dbinfo.ini file
 db_file = os.path.join(xdg.base_config_dir, 'dbinfo.ini')

@@ -20,7 +20,7 @@
 
 import unittest
 
-from uqm_map.data import NameDispFilter, System
+from uqm_map.data import NameDispFilter, System, Quasispace
 
 class NameDispFilterTests(unittest.TestCase):
     """
@@ -124,3 +124,28 @@ class NameDispFilterTests(unittest.TestCase):
         system = System(1, 'System Name', 'Alpha', 5000, 5000, 'blue dwarf', 'extra')
         ndf = NameDispFilter('EXTRA', True)
         self.assertEqual(ndf.approve(system), True)
+
+    def test_match_quasispace(self):
+        """
+        Test matching a quasispace portal
+        """
+        q = Quasispace(5000, 5000, 5000, 5000, 'C')
+        ndf = NameDispFilter('Quasispace Exit C', False)
+        self.assertEqual(ndf.approve(q), True)
+
+    def test_no_match_quasispace(self):
+        """
+        Test not matching a quasispace portal
+        """
+        q = Quasispace(5000, 5000, 5000, 5000, 'C')
+        ndf = NameDispFilter('Quasispace Exit F', False)
+        self.assertEqual(ndf.approve(q), False)
+
+    def test_no_match_quasispace_extra(self):
+        """
+        Test not matching a quasispace portal, when the filter is allowed
+        to search for extra text
+        """
+        q = Quasispace(5000, 5000, 5000, 5000, 'C')
+        ndf = NameDispFilter('Quasispace Exit F', True)
+        self.assertEqual(ndf.approve(q), False)

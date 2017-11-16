@@ -370,34 +370,30 @@ class Systems(object):
         self.dispfilter = Filter()
         self.aggfilter = Filter()
         self.systems = {}
-        self.coords = []
         self.agg_min_value = 9999
         self.agg_max_value = 0
         self.agg_spread = 0
         self.bio_agg_min_value = 9999
         self.bio_agg_max_value = 0
-        self.bio_spread = 0
+        self.bio_agg_spread = 0
         self.connections = []
         self.quasispace = []
-        for x in range(1001):
-            self.coords.append([])
-            for y in range(1001):
-                self.coords[x].append(None)
 
     def add(self, idnum, name, position, x, y, stype, extra):
         """
-        Add a new system, only used during the initial import.
+        Add a new system, only used during the initial import.  Returns
+        the new System object.
         """
         self.systems[idnum] = System(idnum, name, position, x, y, stype, extra)
-        self.coords[self.systems[idnum].draw_x][self.systems[idnum].draw_y] = self.systems[idnum]
+        return self.systems[idnum]
 
     def add_quasi(self, x, y, qs_x, qs_y, label):
         """
         Adds a new quasispace exit, only used during the initial import.
         """
         self.systems[label] = Quasispace(x, y, qs_x, qs_y, label)
-        self.coords[self.systems[label].draw_x][self.systems[label].draw_y] = self.systems[label]
         self.quasispace.append(self.systems[label])
+        return self.systems[label]
 
     def get(self, idnum):
         """
@@ -407,12 +403,6 @@ class Systems(object):
             return self.systems[idnum]
         except KeyError:
             return None
-
-    def lookup(self, x, y):
-        """
-        Looks up a system given an (x,y) coord from the map
-        """
-        return self.coords[int(x)][int(y)]
 
     def getall(self):
         """
@@ -432,12 +422,12 @@ class Systems(object):
         self.agg_spread = 0
         self.bio_agg_min_value = 9999
         self.bio_agg_max_value = 0
-        self.bio_spread = 0
+        self.bio_agg_spread = 0
         for system in self.getall():
             if (system.quasi):
                 continue
             (mineral, bio) = system.apply_filters(self.dispfilter, self.aggfilter)
-            if (system.highlight):
+            if system.highlight:
                 if (mineral < self.agg_min_value):
                     self.agg_min_value = mineral
                 if (mineral > self.agg_max_value):
@@ -446,26 +436,37 @@ class Systems(object):
                     self.bio_agg_min_value = bio
                 if (bio > self.bio_agg_max_value):
                     self.bio_agg_max_value = bio
-        self.agg_spread = float(self.agg_max_value - self.agg_min_value)
-        self.bio_spread = float(self.bio_agg_max_value - self.bio_agg_min_value)
 
-    def ret_intensity(self, system):
+        # The checks in here would only occur if no systems have been loaded,
+        # or if no systems match the given filters
+        if self.agg_min_value == 9999 and self.agg_max_value == 0:
+            self.agg_min_value = 0
+        else:
+            self.agg_spread = float(self.agg_max_value - self.agg_min_value)
+        if self.bio_agg_min_value == 9999 and self.bio_agg_max_value == 0:
+            self.bio_agg_min_value = 0
+        else:
+            self.bio_agg_spread = float(self.bio_agg_max_value - self.bio_agg_min_value)
+
+    def mineral_intensity(self, system):
         """
         Returns the mineral intensity of a given system, based on the calculated aggregates.
+        This will be a value from 0 to 1.
         """
         if (self.agg_spread == 0):
-            return 100
+            return 1
         else:
-            return (system.min_agg.value()-self.agg_min_value)/self.agg_spread
+            return (system.mineral_agg.value()-self.agg_min_value)/self.agg_spread
 
-    def ret_bio_intensity(self, system):
+    def bio_intensity(self, system):
         """
         Returns the biological intensity of a given system, based on the calculated aggregates.
+        This will be a value from 0 to 1.
         """
-        if (self.bio_spread == 0):
-            return 100
+        if (self.bio_agg_spread == 0):
+            return 1
         else:
-            return (system.bio_agg-self.bio_agg_min_value)/self.bio_spread
+            return (system.bio_agg-self.bio_agg_min_value)/self.bio_agg_spread
 
 class Quasispace(object):
     """
@@ -489,6 +490,7 @@ class Quasispace(object):
         self.id = label
         self.quasi = True
         self.fullname = 'Quasispace Exit {}'.format(label)
+        self.extra = ''
 
     def distance_to(self, system):
         """

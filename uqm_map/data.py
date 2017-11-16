@@ -292,7 +292,7 @@ class System(object):
     """
 
     def __init__(self, idnum, name, position, x, y, stype, extra):
-        self.quasi = False
+        self.is_quasispace = False
         self.idnum = idnum
         self.name = name
         self.x = x
@@ -315,7 +315,6 @@ class System(object):
             self.fullname = '{} {}'.format(self.position, self.name)
         else:
             self.fullname = self.name
-        self.quasispace = False
 
     def addplanet(self, planet):
         """
@@ -424,7 +423,7 @@ class Systems(object):
         self.bio_agg_max_value = 0
         self.bio_agg_spread = 0
         for system in self.getall():
-            if (system.quasi):
+            if (system.is_quasispace):
                 continue
             (mineral, bio) = system.apply_filters(self.dispfilter, self.aggfilter)
             if system.highlight:
@@ -481,14 +480,16 @@ class Quasispace(object):
     def __init__(self, x, y, qs_x, qs_y, label):
         self.x = x
         self.y = y
+        # TODO: these, too, are GUI.  Pull 'em out of here
         self.draw_x = int(x/10)
         self.draw_y = 1000-int(y/10)
         self.qs_x = qs_x
         self.qs_y = qs_y
+        # TODO: Guiiiiiiiii....
         self.draw_quasi_x = qs_x-Quasispace.quasi_offset
         self.draw_quasi_y = (1000-qs_y)-Quasispace.quasi_offset
         self.id = label
-        self.quasi = True
+        self.is_quasispace = True
         self.fullname = 'Quasispace Exit {}'.format(label)
         self.extra = ''
 
@@ -496,8 +497,7 @@ class Quasispace(object):
         """
         Returns the distance between this system and the specified one
         """
-        if system:
-            return (math.sqrt((self.x-system.x)**2+(self.y-system.y)**2)/10)
+        return (math.sqrt((self.x-system.x)**2+(self.y-system.y)**2)/10)
 
 def get_systems(filename):
     """

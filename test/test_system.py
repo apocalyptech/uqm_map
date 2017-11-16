@@ -46,6 +46,7 @@ class SystemTests(unittest.TestCase):
         self.assertEqual(self.s.stype, 'blue dwarf')
         self.assertEqual(self.s.extra, 'hint')
         self.assertEqual(self.s.fullname, 'Alpha System')
+        self.assertEqual(self.s.is_quasispace, False)
 
     def test_init_no_position(self):
         """

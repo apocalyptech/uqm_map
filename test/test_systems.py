@@ -39,27 +39,48 @@ class SystemsTests(unittest.TestCase):
         Tests basic initialization
         """
         self.assertEqual(list(self.s.getall()), [])
+        self.assertEqual(len(self.s.constellation_names), 0)
+        self.assertEqual(len(self.s.planet_types), 0)
 
     def test_add_single(self):
         """
         Tests adding a system (this and the next few tests also happen to
         test `get()` and `getall()`.
         """
-        sys = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         self.assertEqual(list(self.s.getall()), [sys])
         self.assertEqual(self.s.get(1), sys)
+        self.assertEqual(len(self.s.constellation_names), 1)
+        self.assertIn('System', self.s.constellation_names)
 
     def test_add_two_systems(self):
         """
         Tests adding two systems
         """
-        sys1 = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
-        sys2 = self.s.add(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
+        sys1 = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys2 = self.s.add_system(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
         systems = list(self.s.getall())
         self.assertIn(sys1, systems)
         self.assertIn(sys2, systems)
         self.assertEqual(self.s.get(1), sys1)
         self.assertEqual(self.s.get(2), sys2)
+        self.assertEqual(len(self.s.constellation_names), 1)
+        self.assertIn('System', self.s.constellation_names)
+
+    def test_add_two_different_systems(self):
+        """
+        Tests adding two systems with different constellation names
+        """
+        sys1 = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys2 = self.s.add_system(2, 'SystemTwo', 'Alpha', 5500, 5500, 'blue dwarf', '')
+        systems = list(self.s.getall())
+        self.assertIn(sys1, systems)
+        self.assertIn(sys2, systems)
+        self.assertEqual(self.s.get(1), sys1)
+        self.assertEqual(self.s.get(2), sys2)
+        self.assertEqual(len(self.s.constellation_names), 2)
+        self.assertIn('System', self.s.constellation_names)
+        self.assertIn('SystemTwo', self.s.constellation_names)
 
     def test_add_quasispace(self):
         """
@@ -68,6 +89,7 @@ class SystemsTests(unittest.TestCase):
         q = self.s.add_quasi(4900, 4900, 3000, 3000, 'C')
         self.assertEqual(list(self.s.getall()), [q])
         self.assertEqual(self.s.get('C'), q)
+        self.assertEqual(len(self.s.constellation_names), 0)
 
     def test_add_two_quasispace(self):
         """
@@ -80,6 +102,49 @@ class SystemsTests(unittest.TestCase):
         self.assertIn(q2, systems)
         self.assertEqual(self.s.get('C'), q1)
         self.assertEqual(self.s.get('A'), q2)
+        self.assertEqual(len(self.s.constellation_names), 0)
+
+    def test_add_planet_type_single(self):
+        """
+        Tests `add_planet_type` by adding a single planet
+        """
+        p = Planet(1, 'Planet I', 'Acid World', 1, 1, 100, 1, 10, 5, MinData())
+        self.s.add_planet_type(p)
+        self.assertEqual(len(self.s.planet_types), 1)
+        self.assertIn('Acid', self.s.planet_types)
+
+    def test_add_planet_type_double(self):
+        """
+        Tests `add_planet_type` by adding a two planets with the same type
+        """
+        p = Planet(1, 'Planet I', 'Acid World', 1, 1, 100, 1, 10, 5, MinData())
+        p2 = Planet(2, 'Planet II', 'Acid World', 1, 1, 100, 1, 10, 5, MinData())
+        self.s.add_planet_type(p)
+        self.s.add_planet_type(p2)
+        self.assertEqual(len(self.s.planet_types), 1)
+        self.assertIn('Acid', self.s.planet_types)
+
+    def test_add_planet_type_no_world(self):
+        """
+        Tests `add_planet_type` by adding a single planet whose type does not
+        include "World".  (Are there any planets actually like this?)
+        """
+        p = Planet(1, 'Planet I', 'Moonbase', 1, 1, 100, 1, 10, 5, MinData())
+        self.s.add_planet_type(p)
+        self.assertEqual(len(self.s.planet_types), 1)
+        self.assertIn('Moonbase', self.s.planet_types)
+
+    def test_add_planet_type_two_types(self):
+        """
+        Tests `add_planet_type` by adding a two planets with different types
+        """
+        p = Planet(1, 'Planet I', 'Acid World', 1, 1, 100, 1, 10, 5, MinData())
+        p2 = Planet(2, 'Planet II', 'Treasure World', 1, 1, 100, 1, 10, 5, MinData())
+        self.s.add_planet_type(p)
+        self.s.add_planet_type(p2)
+        self.assertEqual(len(self.s.planet_types), 2)
+        self.assertIn('Acid', self.s.planet_types)
+        self.assertIn('Treasure', self.s.planet_types)
 
     def test_get_no_systems(self):
         """
@@ -120,7 +185,7 @@ class SystemsTests(unittest.TestCase):
         """
         Process aggregates when there is one system
         """
-        sys = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
@@ -138,7 +203,7 @@ class SystemsTests(unittest.TestCase):
         filters
         """
         self.s.dispfilter.add(NameDispFilter('System', False))
-        sys = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
@@ -156,7 +221,7 @@ class SystemsTests(unittest.TestCase):
         filters
         """
         self.s.dispfilter.add(NameDispFilter('Yehat', False))
-        sys = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
@@ -175,7 +240,7 @@ class SystemsTests(unittest.TestCase):
         """
         f = SafetyAggFilter()
         self.s.aggfilter.add(f)
-        sys = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
@@ -198,7 +263,7 @@ class SystemsTests(unittest.TestCase):
         f = SafetyAggFilter()
         f.set_weather(2)
         self.s.aggfilter.add(f)
-        sys = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
@@ -221,7 +286,7 @@ class SystemsTests(unittest.TestCase):
         f = SafetyAggFilter()
         f.set_weather(2)
         self.s.aggfilter.add(f)
-        sys = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys.addplanet(Planet(1, 'Acid', 'Acid World', 3, 3, 100, 1, 10, 5, MinData(
             base=3,
             )))
@@ -240,11 +305,11 @@ class SystemsTests(unittest.TestCase):
         """
         Process aggregates when there are two systems
         """
-        sys1 = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys1 = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys1.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
-        sys2 = self.s.add(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
+        sys2 = self.s.add_system(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
         sys2.addplanet(Planet(2, 'Acid', 'Acid World', 1, 1, 100, 1, 5, 0, MinData(
             radioactive=3,
             )))
@@ -260,15 +325,15 @@ class SystemsTests(unittest.TestCase):
         """
         Process aggregates when there are three systems
         """
-        sys1 = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys1 = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys1.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
-        sys2 = self.s.add(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
+        sys2 = self.s.add_system(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
         sys2.addplanet(Planet(2, 'Acid', 'Acid World', 1, 1, 100, 1, 5, 0, MinData(
             radioactive=3,
             )))
-        sys3 = self.s.add(3, 'System', 'Gamma', 6000, 6000, 'blue dwarf', '')
+        sys3 = self.s.add_system(3, 'System', 'Gamma', 6000, 6000, 'blue dwarf', '')
         sys3.addplanet(Planet(3, 'Acid', 'Acid World', 1, 1, 100, 1, 0, 0, MinData(
             exotic=3,
             )))
@@ -289,15 +354,15 @@ class SystemsTests(unittest.TestCase):
         f.set_weather(2)
         self.s.aggfilter.add(f)
         self.s.dispfilter.add(NameDispFilter('System', False))
-        sys1 = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys1 = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys1.addplanet(Planet(1, 'Acid', 'Acid World', 3, 3, 100, 1, 10, 5, MinData(
             base=3,
             )))
-        sys2 = self.s.add(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
+        sys2 = self.s.add_system(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
         sys2.addplanet(Planet(2, 'Acid', 'Acid World', 1, 1, 100, 1, 5, 0, MinData(
             radioactive=3,
             )))
-        sys3 = self.s.add(3, 'Serpentis', 'Gamma', 6000, 6000, 'blue dwarf', '')
+        sys3 = self.s.add_system(3, 'Serpentis', 'Gamma', 6000, 6000, 'blue dwarf', '')
         sys3.addplanet(Planet(3, 'Acid', 'Acid World', 1, 1, 100, 1, 0, 0, MinData(
             exotic=3,
             )))
@@ -313,7 +378,7 @@ class SystemsTests(unittest.TestCase):
         """
         Tests mineral intensity for a single system
         """
-        sys1 = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys1 = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys1.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
@@ -324,15 +389,15 @@ class SystemsTests(unittest.TestCase):
         """
         Tests mineral intensity for multiple systems
         """
-        sys1 = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys1 = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys1.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
-        sys2 = self.s.add(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
+        sys2 = self.s.add_system(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
         sys2.addplanet(Planet(2, 'Acid', 'Acid World', 1, 1, 100, 1, 5, 0, MinData(
             radioactive=3,
             )))
-        sys3 = self.s.add(3, 'System', 'Gamma', 6000, 6000, 'blue dwarf', '')
+        sys3 = self.s.add_system(3, 'System', 'Gamma', 6000, 6000, 'blue dwarf', '')
         sys3.addplanet(Planet(3, 'Acid', 'Acid World', 1, 1, 100, 1, 0, 0, MinData(
             exotic=3,
             )))
@@ -345,7 +410,7 @@ class SystemsTests(unittest.TestCase):
         """
         Tests bio intensity for a single system
         """
-        sys1 = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys1 = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys1.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
@@ -356,15 +421,15 @@ class SystemsTests(unittest.TestCase):
         """
         Tests bio intensity for multiple systems
         """
-        sys1 = self.s.add(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
+        sys1 = self.s.add_system(1, 'System', 'Alpha', 5000, 5000, 'blue dwarf', '')
         sys1.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 10, 5, MinData(
             base=3,
             )))
-        sys2 = self.s.add(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
+        sys2 = self.s.add_system(2, 'System', 'Beta', 5500, 5500, 'blue dwarf', '')
         sys2.addplanet(Planet(2, 'Acid', 'Acid World', 1, 1, 100, 1, 5, 0, MinData(
             radioactive=3,
             )))
-        sys3 = self.s.add(3, 'System', 'Gamma', 6000, 6000, 'blue dwarf', '')
+        sys3 = self.s.add_system(3, 'System', 'Gamma', 6000, 6000, 'blue dwarf', '')
         sys3.addplanet(Planet(3, 'Acid', 'Acid World', 1, 1, 100, 1, 0, 0, MinData(
             exotic=3,
             )))

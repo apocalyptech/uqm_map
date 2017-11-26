@@ -61,7 +61,9 @@ class SystemTests(unittest.TestCase):
         Tests adding a single planet
         """
         self.assertEqual(len(self.s.planets), 0)
-        self.s.addplanet(Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 0, 0, MinData()))
+        p = Planet(1, 'Acid', 'Acid World', 1, 1, 100, 1, 0, 0, MinData())
+        p2 = self.s.addplanet(p)
+        self.assertEqual(p, p2)
         self.assertEqual(len(self.s.planets), 1)
 
     def test_add_two_planets(self):

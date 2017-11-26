@@ -18,6 +18,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import os
 import unittest
 
 from uqm_map.data import Systems, System, Planet, MinData, NameDispFilter, SafetyAggFilter
@@ -130,10 +131,10 @@ class SystemsTests(unittest.TestCase):
         Tests `add_planet_type` by adding a single planet whose type does not
         include "World".  (Are there any planets actually like this?)
         """
-        p = Planet(1, 'Planet I', 'Moonbase', 1, 1, 100, 1, 10, 5, MinData())
+        p = Planet(1, 'Planet I', 'StarBase', 1, 1, 100, 1, 10, 5, MinData())
         self.s.add_planet_type(p)
         self.assertEqual(len(self.s.planet_types), 1)
-        self.assertIn('Moonbase', self.s.planet_types)
+        self.assertIn('StarBase', self.s.planet_types)
 
     def test_add_planet_type_two_types(self):
         """
@@ -585,3 +586,22 @@ class SystemsTests(unittest.TestCase):
         conn = s.connections[0]
         self.assertEqual(conn[0], sys1)
         self.assertEqual(conn[1], sys2)
+
+    def test_load_from_file_default(self):
+        """
+        Test loading our main default datafile
+        """
+        s = Systems.load_from_file()
+        self.assertEqual(len(s.systems), 518)
+        self.assertEqual(len(s.quasispace), 16)
+        self.assertEqual(len(s.connections), 424)
+        self.assertEqual(len(s.planet_types), 53)
+        self.assertEqual(len(s.constellation_names), 132)
+
+    def test_load_from_file_invalid_file(self):
+        """
+        Tests loading from an invalid filename (ie: this test file)
+        """
+        with self.assertRaises(OSError) as cm:
+            Systems.load_from_file(os.path.realpath(__file__))
+        self.assertIn('Not a gzipped file', str(cm.exception))

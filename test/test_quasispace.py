@@ -41,6 +41,7 @@ class QuasispaceTests(unittest.TestCase):
         Tests our basic initialization routine
         """
         self.assertEqual(self.q.fullname, 'Quasispace Exit Q')
+        self.assertEqual(self.q.label, 'Q')
         self.assertEqual(self.q.x, 5000)
         self.assertEqual(self.q.y, 5000)
         self.assertEqual(self.q.qs_x, 4000)

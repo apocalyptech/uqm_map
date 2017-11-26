@@ -380,7 +380,7 @@ class Quasispace(object):
         # TODO: Guiiiiiiiii....
         self.draw_quasi_x = qs_x-Quasispace.quasi_offset
         self.draw_quasi_y = (1000-qs_y)-Quasispace.quasi_offset
-        self.id = label
+        self.label = label
         self.is_quasispace = True
         self.fullname = 'Quasispace Exit {}'.format(label)
         self.extra = ''
@@ -614,12 +614,7 @@ class Systems(object):
         """
 
         # Process the JSON string
-        data = None
         data = json.loads(json_string)
-        if data is None:
-            raise Exception('Data not found in {}'.format(filename))
-
-        planet_types = {}
 
         # Create our systems
         systems = Systems()

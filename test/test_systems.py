@@ -41,6 +41,7 @@ class SystemsTests(unittest.TestCase):
         self.assertEqual(list(self.s.getall()), [])
         self.assertEqual(len(self.s.constellation_names), 0)
         self.assertEqual(len(self.s.planet_types), 0)
+        self.assertEqual(self.s.connections, [])
 
     def test_add_single(self):
         """
@@ -437,3 +438,150 @@ class SystemsTests(unittest.TestCase):
         self.assertAlmostEqual(self.s.bio_intensity(sys3), 0)
         self.assertAlmostEqual(self.s.bio_intensity(sys2), .5)
         self.assertAlmostEqual(self.s.bio_intensity(sys1), 1)
+
+    def test_load_from_json_no_data(self):
+        """
+        Tests loading from JSON when not actually passed any JSON data.
+        """
+        with self.assertRaises(Exception) as cm:
+            Systems.load_from_json(None)
+
+    def test_load_from_json_empty_string(self):
+        """
+        Tests loading from JSON when passed an empty string
+        """
+        with self.assertRaises(Exception) as cm:
+            Systems.load_from_json('')
+
+    def test_load_from_json_empty_hash(self):
+        """
+        Tests loading from JSON when passed an empty hash
+        """
+        with self.assertRaises(KeyError) as cm:
+            Systems.load_from_json('{}')
+
+    def test_load_from_json_empty_data(self):
+        """
+        Tests loading from JSON with technically valid but empty data
+        """
+        json_str = '{"systems": [], "quasispace": [], "planets": [], "constellations": {}}'
+        s = Systems.load_from_json(json_str)
+        self.assertEqual(list(self.s.getall()), [])
+        self.assertEqual(len(self.s.constellation_names), 0)
+        self.assertEqual(len(self.s.planet_types), 0)
+        self.assertEqual(self.s.connections, [])
+
+    def test_load_from_json_single_system_no_planets(self):
+        """
+        Tests loading from JSON with a single system (and no planets)
+        """
+        json_str = '{"systems": [{"sid": 1, "name": "System", "position": "Alpha",' \
+            '"x": 5000, "y": 6000, "stype": "green dwarf", "extra": "homeworld"' \
+            '}], "quasispace": [], "planets": [], "constellations": {}}'
+        s = Systems.load_from_json(json_str)
+        self.assertEqual(len(s.systems), 1)
+        sys = s.get(1)
+        self.assertEqual(sys.idnum, 1)
+        self.assertEqual(sys.name, 'System')
+        self.assertEqual(sys.position, 'Alpha')
+        self.assertEqual(sys.x, 5000)
+        self.assertEqual(sys.y, 6000)
+        self.assertEqual(sys.stype, 'green dwarf')
+        self.assertEqual(sys.extra, 'homeworld')
+        self.assertEqual(sys.planets, [])
+        self.assertEqual(len(s.constellation_names), 1)
+        self.assertIn('System', s.constellation_names)
+
+    def test_load_from_json_single_system_one_planet(self):
+        """
+        Tests loading from JSON with a single system and one planet
+        """
+        json_str = '{"systems": [{"sid": 1, "name": "System", "position": "Alpha",' \
+            '"x": 5000, "y": 6000, "stype": "green dwarf", "extra": "homeworld"' \
+            '}], "quasispace": [], "planets": [{"pid": 2, "sid": 1,' \
+            '"pname": "Planet I", "ptype": "Acid World", "tectonics": 2, ' \
+            '"weather": 3, "temp": 400, "gravity": 1, "bio": 100, "bio_danger": 50, ' \
+            '"mineral": 123, ' \
+            '"min_common": 1, ' \
+            '"min_corrosive": 2, ' \
+            '"min_base": 3, ' \
+            '"min_noble": 4, ' \
+            '"min_rare": 5, ' \
+            '"min_precious": 6, ' \
+            '"min_radio": 7, ' \
+            '"min_exotic": 8 ' \
+            '}], "constellations": {}}'
+        s = Systems.load_from_json(json_str)
+        self.assertEqual(len(s.systems), 1)
+        sys = s.get(1)
+        self.assertEqual(sys.idnum, 1)
+        self.assertEqual(sys.name, 'System')
+        self.assertEqual(sys.position, 'Alpha')
+        self.assertEqual(sys.x, 5000)
+        self.assertEqual(sys.y, 6000)
+        self.assertEqual(sys.stype, 'green dwarf')
+        self.assertEqual(sys.extra, 'homeworld')
+        self.assertEqual(len(s.constellation_names), 1)
+        self.assertIn('System', s.constellation_names)
+        self.assertEqual(len(sys.planets), 1)
+        p = sys.planets[0]
+        self.assertEqual(p.idnum, 2)
+        self.assertEqual(p.name, 'Planet I')
+        self.assertEqual(p.ptype, 'Acid World')
+        self.assertEqual(p.tectonics, 2)
+        self.assertEqual(p.weather, 3)
+        self.assertEqual(p.temp, 400)
+        self.assertEqual(p.gravity, 1)
+        self.assertEqual(p.bio, 100)
+        self.assertEqual(p.bio_danger, 50)
+        self.assertEqual(p.mineral.common, 1)
+        self.assertEqual(p.mineral.corrosive, 2)
+        self.assertEqual(p.mineral.base, 3)
+        self.assertEqual(p.mineral.noble, 4)
+        self.assertEqual(p.mineral.rare, 5)
+        self.assertEqual(p.mineral.precious, 6)
+        self.assertEqual(p.mineral.radioactive, 7)
+        self.assertEqual(p.mineral.exotic, 8)
+        self.assertEqual(len(s.planet_types), 1)
+        self.assertIn('Acid', s.planet_types)
+
+    def test_load_from_json_one_quasispace(self):
+        """
+        Tests loading from JSON with a single Quasispace exit
+        """
+        json_str = '{"systems": [], "quasispace": [' \
+                '{"label": "A", "x": 5000, "y": 6000, ' \
+                '"qs_x": 4000, "qs_y": 4500} ' \
+                '], "planets": [], "constellations": {}}'
+        s = Systems.load_from_json(json_str)
+        self.assertEqual(len(s.quasispace), 1)
+        q = s.quasispace[0]
+        self.assertEqual(s.get('A'), q)
+        self.assertEqual(q.label, 'A')
+        self.assertEqual(q.x, 5000)
+        self.assertEqual(q.y, 6000)
+        self.assertEqual(q.qs_x, 4000)
+        self.assertEqual(q.qs_y, 4500)
+
+    def test_load_from_json_single_constellation(self):
+        """
+        Tests loading from JSON with two systems joined in a constellation
+        """
+        json_str = '{"systems": [' \
+            '{"sid": 1, "name": "System", "position": "Alpha",' \
+            '"x": 5000, "y": 6000, "stype": "green dwarf", "extra": "homeworld"' \
+            '}, ' \
+            '{"sid": 2, "name": "System", "position": "Beta",' \
+            '"x": 6000, "y": 7000, "stype": "green dwarf", "extra": ""' \
+            '} ' \
+            '], "quasispace": [], "planets": [], "constellations": {' \
+            '"1": [2]' \
+            '}}'
+        s = Systems.load_from_json(json_str)
+        self.assertEqual(len(s.systems), 2)
+        sys1 = s.get(1)
+        sys2 = s.get(2)
+        self.assertEqual(len(s.connections), 1)
+        conn = s.connections[0]
+        self.assertEqual(conn[0], sys1)
+        self.assertEqual(conn[1], sys2)
